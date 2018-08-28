@@ -81,7 +81,7 @@ public class MessageAppApplicationTests {
 	@Test
 	@WithMockUser(roles = "ACTUATOR")
 	public void actuatorWhenAuthorizedThenOk() throws Exception {
-		this.mockMvc.perform(get("/env"))
+		this.mockMvc.perform(get("/actuator/env"))
 				.andExpect(status().isOk());
 	}
 
