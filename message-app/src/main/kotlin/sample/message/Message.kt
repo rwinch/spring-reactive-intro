@@ -14,17 +14,12 @@
  * limitations under the License.
  */
 
-package sample.message;
+package sample.message
 
-import reactor.core.publisher.Mono;
-
-import java.util.List;
+import com.fasterxml.jackson.annotation.JsonProperty
 
 /**
  * @author Rob Winch
  */
-public interface MessageService {
-	Mono<List<Message>> findAll();
-
-	Mono<List<Message>> findMessageByToUserEmail(String email);
+data class Message(val id: Long, @JsonProperty("to_user_id") val toUserId: String, val text: String) {
 }

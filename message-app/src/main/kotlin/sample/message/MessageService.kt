@@ -14,48 +14,15 @@
  * limitations under the License.
  */
 
-package sample.user;
+package sample.message
+
+import reactor.core.publisher.Mono
 
 /**
  * @author Rob Winch
  */
-public class User {
-	private String id;
+interface MessageService {
+    fun findAll(): Mono<List<Message>>
 
-	private String email;
-
-	private String name;
-
-	public User() {
-	}
-
-	public User(String id, String email, String name) {
-		this.id = id;
-		this.email = email;
-		this.name = name;
-	}
-
-	public String getId() {
-		return this.id;
-	}
-
-	public void setId(String id) {
-		this.id = id;
-	}
-
-	public String getEmail() {
-		return this.email;
-	}
-
-	public void setEmail(String email) {
-		this.email = email;
-	}
-
-	public String getName() {
-		return this.name;
-	}
-
-	public void setName(String name) {
-		this.name = name;
-	}
+    fun findMessageByToUserEmail(email: String): Mono<List<Message>>
 }
