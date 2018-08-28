@@ -38,8 +38,8 @@ public class MessageController {
 	}
 
 	@GetMapping
-	List<Message> findAll() {
-		return this.messages.findAll().block();
+	Mono<List<Message>> findAll() {
+		return this.messages.findAll();
 	}
 
 	@GetMapping("/{email}")
