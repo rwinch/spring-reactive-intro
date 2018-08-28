@@ -18,9 +18,31 @@ package sample;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.Bean;
+import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.util.DefaultUriBuilderFactory;
+
+import java.util.HashMap;
+import java.util.Map;
 
 @SpringBootApplication
 public class MessageAppApplication {
+	private String usersBaseUri = "http://localhost:8081/users";
+
+	private String messagesBaseUri = "http://localhost:8082/messages";
+
+	@Bean
+	WebClient webClient() {
+		Map<String, Object> variables = new HashMap<>();
+		variables.put("users", this.usersBaseUri);
+		variables.put("messages", this.messagesBaseUri);
+		DefaultUriBuilderFactory uriBuilderFactory = new DefaultUriBuilderFactory();
+		uriBuilderFactory.setDefaultUriVariables(variables);
+		uriBuilderFactory.setEncodingMode(DefaultUriBuilderFactory.EncodingMode.URI_COMPONENT);
+		return WebClient.builder()
+				.uriBuilderFactory(uriBuilderFactory)
+				.build();
+	}
 
 	public static void main(String[] args) {
 		SpringApplication.run(MessageAppApplication.class, args);

@@ -16,13 +16,15 @@
 
 package sample.message;
 
+import reactor.core.publisher.Mono;
+
 import java.util.List;
 
 /**
  * @author Rob Winch
  */
 public interface MessageService {
-	List<Message> findAll();
+	Mono<List<Message>> findAll();
 
-	List<Message> findMessageByToUserEmail(String email);
+	Mono<List<Message>> findMessageByToUserEmail(String email);
 }
