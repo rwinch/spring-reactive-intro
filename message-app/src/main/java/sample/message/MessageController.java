@@ -16,20 +16,19 @@
 
 package sample.message;
 
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.MediaType;
+import org.springframework.stereotype.Component;
+import org.springframework.web.reactive.function.server.ServerRequest;
+import org.springframework.web.reactive.function.server.ServerResponse;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * @author Rob Winch
  */
-@RestController
-@RequestMapping("/messages")
+@Component
 public class MessageController {
 	private final MessageService messages;
 
@@ -37,13 +36,18 @@ public class MessageController {
 		this.messages = messages;
 	}
 
-	@GetMapping
-	Mono<List<Message>> findAll() {
-		return this.messages.findAll();
+	public Mono<ServerResponse> findMessageByToUserEmail(ServerRequest request) {
+		String email = request.pathVariable("email");
+		Mono<List<Message>> result = this.messages.findMessageByToUserEmail(email);
+		return ServerResponse.ok()
+				.contentType(MediaType.APPLICATION_JSON)
+				.body(result, new ParameterizedTypeReference<List<Message>>() {});
 	}
 
-	@GetMapping("/{email}")
-	Mono<List<Message>> findMessageByToUserEmail(@PathVariable String email, Map<String, Object> model) {
-		return this.messages.findMessageByToUserEmail(email);
+	public Mono<ServerResponse> findAll(ServerRequest request) {
+		Mono<List<Message>> result = this.messages.findAll();
+		return ServerResponse.ok()
+				.contentType(MediaType.APPLICATION_JSON)
+				.body(result, new ParameterizedTypeReference<List<Message>>() {});
 	}
 }

@@ -24,6 +24,13 @@ import org.springframework.web.util.DefaultUriBuilderFactory;
 
 import java.util.HashMap;
 import java.util.Map;
+import org.springframework.web.reactive.function.server.RouterFunction;
+import org.springframework.web.reactive.function.server.ServerResponse;
+import sample.message.MessageController;
+
+import static org.springframework.web.reactive.function.server.RequestPredicates.GET;
+import static org.springframework.web.reactive.function.server.RequestPredicates.queryParam;
+import static org.springframework.web.reactive.function.server.RouterFunctions.route;
 
 @SpringBootApplication
 public class MessageAppApplication {
@@ -42,6 +49,12 @@ public class MessageAppApplication {
 		return WebClient.builder()
 				.uriBuilderFactory(uriBuilderFactory)
 				.build();
+	}
+
+	@Bean
+	RouterFunction<ServerResponse> monoRouterFunction(MessageController messageController) {
+		return route(GET("/messages"), messageController::findAll)
+				.andRoute(GET("/messages/{email}"), messageController::findMessageByToUserEmail);
 	}
 
 	public static void main(String[] args) {
