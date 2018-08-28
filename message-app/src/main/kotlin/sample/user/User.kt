@@ -14,47 +14,10 @@
  * limitations under the License.
  */
 
-package sample.message;
+package sample.user
 
 /**
  * @author Rob Winch
  */
-public class Message {
-	private Long id;
-
-	private String toUserId;
-
-	private String text;
-
-	public Message() {}
-
-	public Message(Long id, String toUserId, String text) {
-		this.id = id;
-		this.toUserId = toUserId;
-		this.text = text;
-	}
-
-	public Long getId() {
-		return this.id;
-	}
-
-	public void setId(Long id) {
-		this.id = id;
-	}
-
-	public String getToUserId() {
-		return this.toUserId;
-	}
-
-	public void setToUserId(String toUserId) {
-		this.toUserId = toUserId;
-	}
-
-	public String getText() {
-		return this.text;
-	}
-
-	public void setText(String text) {
-		this.text = text;
-	}
+data class User (val id: String, val email: String, val name: String) {
 }
