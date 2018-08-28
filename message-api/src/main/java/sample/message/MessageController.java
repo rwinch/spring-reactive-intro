@@ -44,7 +44,7 @@ public class MessageController {
 
 	@GetMapping("/{id}")
 	Message findById(@PathVariable Long id) {
-		return this.messages.findOne(id);
+		return this.messages.findById(id).orElse(null);
 	}
 
 	@GetMapping(params = "to_user_id")
