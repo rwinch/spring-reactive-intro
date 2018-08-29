@@ -23,22 +23,18 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.httpBasic;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import org.springframework.test.web.reactive.server.WebTestClient;
 
 @SpringBootTest
-@AutoConfigureMockMvc
+@AutoConfigureWebTestClient
 @RunWith(SpringRunner.class)
 public class MessageAppApplicationTests {
 	MockWebServer userApi = new MockWebServer();
@@ -46,7 +42,7 @@ public class MessageAppApplicationTests {
 	MockWebServer messageApi = new MockWebServer();
 
 	@Autowired
-	MockMvc mockMvc;
+	WebTestClient rest;
 
 	@Before
 	public void setup() throws Exception {
@@ -64,8 +60,10 @@ public class MessageAppApplicationTests {
 	@WithMockUser
 	public void messageWhenFindAllThenOk() throws Exception {
 		setupMessageFound();
-		this.mockMvc.perform(get("/messages"))
-				.andExpect(status().isOk());
+		this.rest.get()
+			.uri("/messages")
+			.exchange()
+			.expectStatus().isOk();
 		assertThat(this.messageApi.takeRequest().getPath()).isEqualTo("/messages");
 	}
 
@@ -73,33 +71,42 @@ public class MessageAppApplicationTests {
 	@WithMockUser
 	public void messageWhenFindMessageByToUserEmailThenOk() throws Exception {
 		setupMessageFound();
-		this.mockMvc.perform(messagesToRob())
-				.andExpect(status().isOk());
+		messagesToRob()
+			.exchange()
+			.expectStatus()
+			.isOk();
 		assertThat(this.messageApi.takeRequest().getPath()).isEqualTo("/messages?to_user_id=1");
 	}
 
 	@Test
 	@WithMockUser(roles = "ACTUATOR")
 	public void actuatorWhenAuthorizedThenOk() throws Exception {
-		this.mockMvc.perform(get("/actuator/env"))
-				.andExpect(status().isOk());
+		this.rest.get()
+			.uri("/actuator/env")
+			.exchange()
+			.expectStatus().isOk();
 	}
 
 	@Test
 	public void messageWhenNotAuthenticatedThenUnauthorized() throws Exception {
-		this.mockMvc.perform(messagesToRob())
-				.andExpect(status().isUnauthorized());
+		messagesToRob()
+			.exchange()
+			.expectStatus()
+			.isUnauthorized();
 	}
 
 	@Test
 	public void messageWhenHttpBasicValidThenOk() throws Exception {
 		setupMessageFound();
-		this.mockMvc.perform(messagesToRob().with(httpBasic("user", "password")))
-				.andExpect(status().isOk());
+		messagesToRob()
+			.headers(h -> h.setBasicAuth("user", "password"))
+			.exchange()
+			.expectStatus().isOk();
 	}
 
-	private MockHttpServletRequestBuilder messagesToRob() {
-		return get("/messages/{email}", "rwinch@example.com");
+	private WebTestClient.RequestHeadersSpec<?> messagesToRob() {
+		return this.rest.get()
+			.uri("/messages/{email}", "rwinch@gmail.com");
 	}
 
 	private void setupMessageFound() {
