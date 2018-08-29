@@ -16,44 +16,49 @@
 
 package sample
 
-import org.springframework.boot.autoconfigure.SpringBootApplication
-import org.springframework.boot.runApplication
-import org.springframework.context.annotation.Bean
-import org.springframework.http.MediaType.APPLICATION_JSON
-import org.springframework.web.reactive.function.client.WebClient
-import org.springframework.web.reactive.function.server.RouterFunction
-import org.springframework.web.reactive.function.server.ServerResponse
-import org.springframework.web.reactive.function.server.router
-import org.springframework.web.util.DefaultUriBuilderFactory
-import sample.message.MessageController
+import org.springframework.beans.factory.getBean
+import org.springframework.context.support.GenericApplicationContext
+import org.springframework.http.server.reactive.HttpHandler
+import org.springframework.http.server.reactive.ReactorHttpHandlerAdapter
+import org.springframework.web.cors.reactive.CorsWebFilter
+import org.springframework.web.server.adapter.WebHttpHandlerBuilder
+import reactor.netty.DisposableServer
+import reactor.netty.http.server.HttpServer
 
-@SpringBootApplication
 class MessageAppApplication {
-    private val usersBaseUri = "http://localhost:8081/users"
 
-    private val messagesBaseUri = "http://localhost:8082/messages"
+    private val httpHandler: HttpHandler
 
-	@Bean
-	fun webClient() : WebClient {
-        val uriBuilderFactory = DefaultUriBuilderFactory()
-        uriBuilderFactory.encodingMode = DefaultUriBuilderFactory.EncodingMode.URI_COMPONENT
-        uriBuilderFactory.setDefaultUriVariables(mapOf("users" to this.usersBaseUri,
-                "messages" to messagesBaseUri))
-		return WebClient.builder()
-                .uriBuilderFactory(uriBuilderFactory)
-				.build()
-	}
-    @Bean
-    fun route(messageController: MessageController): RouterFunction<ServerResponse> {
-        return router {
-            (accept(APPLICATION_JSON) and "/messages").nest {
-                GET("/{email}", messageController::findMessageByToUserEmail)
-                GET("/", messageController::findAll)
-            }
+    private val server: HttpServer
+
+    private var disposable: DisposableServer? = null
+
+    constructor(port: Int = 8080) {
+        val context = GenericApplicationContext().apply {
+            beans().initialize(this)
+            refresh()
         }
+
+        server = HttpServer.create().port(port)
+        httpHandler = WebHttpHandlerBuilder
+                .applicationContext(context)
+                .apply { if (context.containsBean("corsFilter")) filter(context.getBean<CorsWebFilter>()) }
+                .build()
+    }
+
+    fun start(): HttpServer {
+        return server.handle(ReactorHttpHandlerAdapter(httpHandler))
+    }
+
+    fun startAndAwait() {
+        disposable = start().bind().block()
+    }
+
+    fun stop() {
+        disposable?.disposeNow()
     }
 }
 
 fun main(args: Array<String>) {
-    runApplication<MessageAppApplication>(*args)
+    MessageAppApplication().startAndAwait()
 }

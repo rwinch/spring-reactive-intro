@@ -26,7 +26,6 @@ import reactor.core.publisher.Mono
 /**
  * @author Rob Winch
  */
-@Component
 class MessageController(private val messages: MessageService) {
 
     fun findMessageByToUserEmail(request: ServerRequest): Mono<ServerResponse> {
