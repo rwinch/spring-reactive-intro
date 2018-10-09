@@ -32,14 +32,14 @@ public class MessageAppApplication {
 	private String messagesBaseUri = "http://localhost:8082/messages";
 
 	@Bean
-	WebClient webClient() {
+	WebClient webClient(WebClient.Builder webClient) {
 		Map<String, Object> variables = new HashMap<>();
 		variables.put("users", this.usersBaseUri);
 		variables.put("messages", this.messagesBaseUri);
 		DefaultUriBuilderFactory uriBuilderFactory = new DefaultUriBuilderFactory();
 		uriBuilderFactory.setDefaultUriVariables(variables);
 		uriBuilderFactory.setEncodingMode(DefaultUriBuilderFactory.EncodingMode.URI_COMPONENT);
-		return WebClient.builder()
+		return webClient
 				.uriBuilderFactory(uriBuilderFactory)
 				.build();
 	}
