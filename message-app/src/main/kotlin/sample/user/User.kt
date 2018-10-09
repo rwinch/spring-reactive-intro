@@ -19,5 +19,4 @@ package sample.user
 /**
  * @author Rob Winch
  */
-data class User (val id: String, val email: String, val name: String) {
-}
+data class User (val id: String, val email: String, val name: String)

@@ -18,7 +18,6 @@ package sample.message
 
 import org.springframework.core.ParameterizedTypeReference
 import org.springframework.http.MediaType
-import org.springframework.stereotype.Component
 import org.springframework.web.reactive.function.server.ServerRequest
 import org.springframework.web.reactive.function.server.ServerResponse
 import reactor.core.publisher.Mono
@@ -26,7 +25,6 @@ import reactor.core.publisher.Mono
 /**
  * @author Rob Winch
  */
-@Component
 class MessageController(private val messages: MessageService) {
 
     fun findMessageByToUserEmail(request: ServerRequest): Mono<ServerResponse> {

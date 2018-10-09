@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *	  http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,45 +16,51 @@
 
 package sample
 
-import org.springframework.boot.autoconfigure.SpringBootApplication
-import org.springframework.boot.runApplication
-import org.springframework.context.annotation.Bean
+import org.springframework.boot.kofu.application
+import org.springframework.boot.kofu.web.server
+import org.springframework.context.support.beans
 import org.springframework.http.MediaType.APPLICATION_JSON
+import org.springframework.http.client.reactive.ReactorClientHttpConnector
 import org.springframework.web.reactive.function.client.WebClient
-import org.springframework.web.reactive.function.server.RouterFunction
-import org.springframework.web.reactive.function.server.ServerResponse
 import org.springframework.web.reactive.function.server.router
 import org.springframework.web.util.DefaultUriBuilderFactory
+import reactor.netty.http.client.HttpClient
 import sample.message.MessageController
+import sample.message.WebClientMessageService
 
-@SpringBootApplication
-class MessageAppApplication {
-	private val usersBaseUri = "http://localhost:8081/users"
+const val usersBaseUri = "http://localhost:8081/users"
+const val messagesBaseUri = "http://localhost:8082/messages"
 
-	private val messagesBaseUri = "http://localhost:8082/messages"
-
-	@Bean
-	fun webClient(webClient: WebClient.Builder) : WebClient {
-		val uriBuilderFactory = DefaultUriBuilderFactory()
-		uriBuilderFactory.encodingMode = DefaultUriBuilderFactory.EncodingMode.URI_COMPONENT
-		uriBuilderFactory.setDefaultUriVariables(mapOf("users" to this.usersBaseUri,
-				"messages" to messagesBaseUri))
-		return webClient
-				.uriBuilderFactory(uriBuilderFactory)
-				.build()
-	}
-
-	@Bean
-	fun route(messageController: MessageController): RouterFunction<ServerResponse> {
-		return router {
-			(accept(APPLICATION_JSON) and "/messages").nest {
-				GET("/{email}", messageController::findMessageByToUserEmail)
-				GET("/", messageController::findAll)
-			}
-		}
+fun routes(messageController: MessageController) = router {
+	(accept(APPLICATION_JSON) and "/messages").nest {
+		GET("/{email}", messageController::findMessageByToUserEmail)
+		GET("/", messageController::findAll)
 	}
 }
 
+val beans = beans {
+	bean<MessageController>()
+	bean<WebClientMessageService>()
+	bean {
+		val uriBuilderFactory = DefaultUriBuilderFactory()
+		uriBuilderFactory.encodingMode = DefaultUriBuilderFactory.EncodingMode.URI_COMPONENT
+		uriBuilderFactory.setDefaultUriVariables(mapOf("users" to usersBaseUri, "messages" to messagesBaseUri))
+		val client = HttpClient.create().tcpConfiguration { it.noSSL() }
+		WebClient.builder()
+				.clientConnector(ReactorClientHttpConnector(client))
+				.uriBuilderFactory(uriBuilderFactory)
+				.build()
+	}
+}
+
+val app = application {
+	import(beans)
+	server {
+		import(::routes)
+	}
+
+}
+
 fun main(args: Array<String>) {
-	runApplication<MessageAppApplication>(*args)
+	app.run(args)
 }

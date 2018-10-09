@@ -36,7 +36,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <java.version>1.8</java.version>
-        <kotlin.version>1.2.41</kotlin.version>
+        <kotlin.version>1.2.71</kotlin.version>
         <spring-boot.version>2.1.0.M4</spring-boot.version>
     </properties>
 
@@ -51,11 +51,19 @@
             <id>spring-plugin-snapshot</id>
             <url>https://repo.spring.io/plugins-snapshot</url>
         </pluginRepository>
+        <pluginRepository>
+            <id>kotlin-eap</id>
+            <url>http://dl.bintray.com/kotlin/kotlin-eap</url>
+        </pluginRepository>
     </pluginRepositories>
     <repositories>
         <repository>
             <id>spring-snapshot</id>
             <url>https://repo.spring.io/libs-snapshot</url>
+        </repository>
+        <repository>
+            <id>kotlin-eap</id>
+            <url>http://dl.bintray.com/kotlin/kotlin-eap</url>
         </repository>
     </repositories>
 </project>
