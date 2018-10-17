@@ -16,7 +16,6 @@
 
 package sample.message
 
-import org.springframework.stereotype.Component
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.bodyToMono
 import reactor.core.publisher.Mono
@@ -25,7 +24,6 @@ import sample.user.User
 /**
  * @author Rob Winch
  */
-@Component
 class WebClientMessageService(private val rest: WebClient) : MessageService {
 
     override fun findAll(): Mono<List<Message>> {
